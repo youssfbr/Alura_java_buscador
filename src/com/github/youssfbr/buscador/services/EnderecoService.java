@@ -13,7 +13,7 @@ import java.net.http.HttpResponse;
 public class EnderecoService {
     private static final String HOST = "https://viacep.com.br/ws/";
 
-    public EnderecoDTO buscaEndereco(String cep) {
+    public EnderecoDTO buscaEndereco(String cep) throws RuntimeException {
 
        // final String url = HOST + cep + "/json/";
         final URI endereco = URI.create(HOST + cep + "/json/");
@@ -24,16 +24,17 @@ public class EnderecoService {
                // .uri(URI.create(url))
                 .uri(endereco)
                 .build();
-
-        HttpResponse<String> response = null;
         try {
-            response = client
+            HttpResponse<String> response = client
                     .send(request, HttpResponse.BodyHandlers.ofString());
 
             return new Gson().fromJson(response.body() , EnderecoDTO.class);
         }
         catch (JsonSyntaxException | IllegalStateException | IOException | InterruptedException e) {
             throw new RuntimeException("Não consegui obter o endereco apartir desse CEP");
+        }
+        finally {
+            client.close();
         }
     }
 }
